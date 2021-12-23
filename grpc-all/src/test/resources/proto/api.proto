@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package grpc;
+
+option java_multiple_files = true;
+option java_package = "com.propellerads.libs.grpc.base.proto";
+
+service TestService {
+  rpc Calculate (Request) returns (Response) {}
+}
+
+message Request {
+  string topic = 1;
+}
+
+message Response {
+  string message = 1;
+}
+
