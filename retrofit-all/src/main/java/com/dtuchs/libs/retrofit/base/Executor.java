@@ -5,7 +5,7 @@ import retrofit2.Response;
 
 public interface Executor {
     /**
-     * @deprecated use methods {@link #toBody(Call <T>)}, {@link #toResponse(Call<T>)}
+     * @deprecated use methods {@link #toBody(Call)}, {@link #toResponse(Call)}
      */
     @Deprecated
     <T> T execute(Call<T> call);
@@ -23,10 +23,10 @@ public interface Executor {
     /**
      * @return raw response with fluent check() method;
      */
-    <T> ResponseProxy<T> toResponseProxy(Call<T> call);
+    <T> VerifiableResponse<T> toVerifiableResponse(Call<T> call);
 
     /**
-     * Accept 302 HTTP code as successful request. Used only in {@link #toBody(Call <T>)}, {@link #execute(Call<T>)} methods
+     * Accept 302 HTTP code as successful request. Used only in {@link #toBody(Call)}, {@link #execute(Call)} methods
      * by default - false
      */
     <A extends Executor> A acceptRedirectedResponse(boolean redirectedResponse);

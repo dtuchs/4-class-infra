@@ -4,65 +4,59 @@ import javax.sql.DataSource;
 
 public class DSBuilder {
 
-    private ConnConfig connConfig;
-
-    ConnConfig config() {
-        if (connConfig == null)
-            connConfig = new ConnConfig();
-        return connConfig;
-    }
-
+    private final ConnConfig connConfig = new ConnConfig();
+    
     public DSBuilder postgres() {
-        config().jdbcClass = "org.postgresql.Driver";
-        config().jdbcPrefix = "jdbc:postgresql";
+        connConfig.jdbcClass = "org.postgresql.Driver";
+        connConfig.jdbcPrefix = "jdbc:postgresql";
         return this;
     }
 
     public DSBuilder mySql() {
-        config().jdbcClass = "com.mysql.jdbc.Driver";
-        config().jdbcPrefix = "jdbc:mysql";
+        connConfig.jdbcClass = "com.mysql.jdbc.Driver";
+        connConfig.jdbcPrefix = "jdbc:mysql";
         return this;
     }
 
     public DSBuilder h2() {
-        config().jdbcClass = "org.h2.Driver";
-        config().jdbcPrefix = "jdbc:h2";
+        connConfig.jdbcClass = "org.h2.Driver";
+        connConfig.jdbcPrefix = "jdbc:h2";
         return this;
     }
 
     public DSBuilder vertica() {
-        config().jdbcClass = "com.vertica.jdbc.Driver";
-        config().jdbcPrefix = "jdbc:vertica";
+        connConfig.jdbcClass = "com.vertica.jdbc.Driver";
+        connConfig.jdbcPrefix = "jdbc:vertica";
         return this;
     }
 
     public DSBuilder withJdbcUrl(String jdbcUrl) {
-        config().jdbcUrl = jdbcUrl;
+        connConfig.jdbcUrl = jdbcUrl;
         return this;
     }
 
     public DSBuilder withDbHost(String dbHost) {
-        config().dbHost = dbHost;
+        connConfig.dbHost = dbHost;
         return this;
     }
 
     public DSBuilder withDbName(String dbName) {
-        config().dbName = dbName;
+        connConfig.dbName = dbName;
         return this;
     }
 
     public DSBuilder withUsername(String username) {
-        config().username = username;
+        connConfig.username = username;
         return this;
     }
 
     public DSBuilder withPassword(String password) {
-        config().password = password;
+        connConfig.password = password;
         return this;
     }
 
     public DSBuilder withDbPort(int dbPort) {
-        config().dbPort = dbPort;
+        connConfig.dbPort = dbPort;
         return this;
     }
 
@@ -70,6 +64,6 @@ public class DSBuilder {
      * Build DataSource
      */
     public DataSource build() {
-        return DataSourceContext.INSTANCE.get(config().validate());
+        return DataSourceContext.INSTANCE.get(connConfig.validate());
     }
 }

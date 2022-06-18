@@ -9,7 +9,6 @@ import retrofit2.http.PUT;
 
 
 public interface TestService {
-
     @POST("/test")
     Call<ResponseBody> executeTest(@Body TestData testData);
 
@@ -21,6 +20,4 @@ public interface TestService {
 
     @PUT("/adapter")
     Call<TestData> typeAdapter(@Body TestData testData);
-
-
 }

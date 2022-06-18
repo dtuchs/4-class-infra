@@ -4,21 +4,21 @@ import java.util.Objects;
 
 final class ConnConfig {
 
-    public String dbHost;
-    public Integer dbPort;
-    public String dbName;
+    String dbHost;
+    Integer dbPort;
+    String dbName;
 
-    public String username;
-    public String password;
-    public String persistenceUnitName;
+    String username;
+    String password;
+    String persistenceUnitName;
 
-    public String jdbcClass;
-    public String jdbcPrefix;
-    public String dialect;
+    String jdbcClass;
+    String jdbcPrefix;
+    String dialect;
 
-    public String jdbcUrl;
+    String jdbcUrl;
 
-    public ConnConfig validate() {
+    ConnConfig validate() {
         if (jdbcUrl == null) {
             if (dbHost == null)
                 throw new IllegalStateException("db host must not be null.");

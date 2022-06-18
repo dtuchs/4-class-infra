@@ -8,11 +8,12 @@ import javax.persistence.Persistence;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 enum EmfContext {
     INSTANCE;
 
-    private Logger log = LoggerFactory.getLogger(EmfContext.class);
+    private final Logger log = LoggerFactory.getLogger(EmfContext.class);
     private final Map<ConnConfig, EntityManagerFactory> container = new HashMap<>();
 
     /**
@@ -25,20 +26,17 @@ enum EmfContext {
             log.warn("### Init EntityManagerFactory ###");
 
             Map<String, String> settings = new HashMap<>();
-            settings.put("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
+            settings.put(
+                    "hibernate.connection.provider_class",
+                    "org.hibernate.hikaricp.internal.HikariCPConnectionProvider"
+            );
             settings.put("hibernate.hikari.dataSourceClassName", connConfig.jdbcClass);
             settings.put("hibernate.hikari.maximumPoolSize", "32");
             settings.put("hibernate.hikari.minimumIdle", "0");
             settings.put("hibernate.hikari.idleTimeout", "240000");
             settings.put("hibernate.hikari.maxLifetime", "270000");
             settings.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
-
-            if (connConfig.jdbcUrl == null) {
-                settings.put("hibernate.hikari.dataSource.url", connConfig.jdbcPrefix + "://" + connConfig.dbHost + ":" + connConfig.dbPort + "/" + connConfig.dbName);
-            } else {
-                settings.put("hibernate.hikari.dataSource.url", connConfig.jdbcUrl);
-            }
-
+            settings.put("hibernate.hikari.dataSource.url", Objects.requireNonNullElseGet(connConfig.jdbcUrl, () -> connConfig.jdbcPrefix + "://" + connConfig.dbHost + ":" + connConfig.dbPort + "/" + connConfig.dbName));
             settings.put("hibernate.hikari.dataSource.user", connConfig.username);
             settings.put("hibernate.hikari.dataSource.password", connConfig.password);
             settings.put("hibernate.dialect", connConfig.dialect);

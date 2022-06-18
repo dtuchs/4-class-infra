@@ -4,86 +4,73 @@ import javax.persistence.EntityManagerFactory;
 
 public class EmfBuilder {
 
-    private ConnConfig connConfig;
-
-    ConnConfig config() {
-        if (connConfig == null)
-            connConfig = new ConnConfig();
-        return connConfig;
-    }
+    private final ConnConfig connConfig = new ConnConfig();
 
     public EmfBuilder postgres() {
-        config().jdbcClass = "org.postgresql.ds.PGSimpleDataSource";
-        config().jdbcPrefix = "jdbc:postgresql";
-        config().dialect = "org.hibernate.dialect.PostgreSQL94Dialect";
+        connConfig.jdbcClass = "org.postgresql.ds.PGSimpleDataSource";
+        connConfig.jdbcPrefix = "jdbc:postgresql";
+        connConfig.dialect = "org.hibernate.dialect.PostgreSQL94Dialect";
         return this;
     }
 
     public EmfBuilder mySql() {
-        config().jdbcClass = "com.mysql.cj.jdbc.MysqlDataSource";
-        config().jdbcPrefix = "jdbc:mysql";
-        config().dialect = "org.hibernate.dialect.MySQL8Dialect";
+        connConfig.jdbcClass = "com.mysql.cj.jdbc.MysqlDataSource";
+        connConfig.jdbcPrefix = "jdbc:mysql";
+        connConfig.dialect = "org.hibernate.dialect.MySQL8Dialect";
         return this;
     }
 
     public EmfBuilder h2() {
-        config().jdbcClass = "org.h2.jdbcx.JdbcDataSource";
-        config().jdbcPrefix = "jdbc:h2";
-        config().dialect = "org.hibernate.dialect.H2Dialect";
+        connConfig.jdbcClass = "org.h2.jdbcx.JdbcDataSource";
+        connConfig.jdbcPrefix = "jdbc:h2";
+        connConfig.dialect = "org.hibernate.dialect.H2Dialect";
         return this;
     }
 
-    public EmfBuilder withJdbcUrl(String jdbcUrl) {
-        config().jdbcUrl = jdbcUrl;
+    public EmfBuilder jdbcUrl(String jdbcUrl) {
+        connConfig.jdbcUrl = jdbcUrl;
         return this;
     }
 
-    public EmfBuilder withDbHost(String dbHost) {
-        config().dbHost = dbHost;
+    public EmfBuilder dbHost(String dbHost) {
+        connConfig.dbHost = dbHost;
         return this;
     }
 
-    public EmfBuilder withDbName(String dbName) {
-        config().dbName = dbName;
+    public EmfBuilder dbName(String dbName) {
+        connConfig.dbName = dbName;
         return this;
     }
 
-    public EmfBuilder withUsername(String username) {
-        config().username = username;
+    public EmfBuilder username(String username) {
+        connConfig.username = username;
         return this;
     }
 
-    public EmfBuilder withPassword(String password) {
-        config().password = password;
+    public EmfBuilder password(String password) {
+        connConfig.password = password;
         return this;
     }
 
-    public EmfBuilder withPersistenceUnitName(String persistenceUnitName) {
-        config().persistenceUnitName = persistenceUnitName;
+    public EmfBuilder persistenceUnitName(String persistenceUnitName) {
+        connConfig.persistenceUnitName = persistenceUnitName;
         return this;
     }
 
-    public EmfBuilder withDbPort(int dbPort) {
-        config().dbPort = dbPort;
+    public EmfBuilder dbPort(int dbPort) {
+        connConfig.dbPort = dbPort;
         return this;
     }
 
-    public EmfBuilder withHibernateDialect(String dialect) {
-        config().dialect = dialect;
+    public EmfBuilder hibernateDialect(String dialect) {
+        connConfig.dialect = dialect;
         return this;
-    }
-
-    /**
-     * Build EntityManagerFactory
-     */
-    public EntityManagerFactory build() {
-        return EmfContext.INSTANCE.get(config().validate());
     }
 
     /**
      * Build and wrap an instance of EntityManagerFactory to proxy object
      */
-    public EmfThreadLocal buildThreadLocal() {
-        return new EmfThreadLocal(EmfContext.INSTANCE.get(config().validate()));
+    public EntityManagerFactory build() {
+        return new ThreadSafeEntityManagerFactory(EmfContext.INSTANCE.get(connConfig.validate()));
     }
 }

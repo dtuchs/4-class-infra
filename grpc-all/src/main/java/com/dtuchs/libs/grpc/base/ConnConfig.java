@@ -6,10 +6,9 @@ import java.util.Objects;
 
 final class ConnConfig {
 
-    public String grpcHost;
-    public Integer grpcPort;
-    public Boolean autoConvertRawJson = false;
-    public Class<? extends AbstractStub<?>> stubClass;
+    String grpcHost;
+    Integer grpcPort;
+    Class<? extends AbstractStub<?>> stubClass;
 
     public ConnConfig validate() {
         if (grpcHost == null)
@@ -26,11 +25,11 @@ final class ConnConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ConnConfig that = (ConnConfig) o;
-        return Objects.equals(grpcHost, that.grpcHost) && Objects.equals(grpcPort, that.grpcPort) && Objects.equals(autoConvertRawJson, that.autoConvertRawJson) && Objects.equals(stubClass, that.stubClass);
+        return Objects.equals(grpcHost, that.grpcHost) && Objects.equals(grpcPort, that.grpcPort) && Objects.equals(stubClass, that.stubClass);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(grpcHost, grpcPort, autoConvertRawJson, stubClass);
+        return Objects.hash(grpcHost, grpcPort, stubClass);
     }
 }

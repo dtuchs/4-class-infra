@@ -5,19 +5,23 @@
     <parent>
         <groupId>com.dtuchs.libs</groupId>
         <artifactId>common-tools</artifactId>
-        <version>2.3.1</version>
+        <version>1.0.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mock-server-all</artifactId>
-    <version>1.2.2</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
+
+    <properties>
+        <mockserver-client-java.version>5.13.2</mockserver-client-java.version>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-client-java</artifactId>
-            <version>5.11.2</version>
+            <version>${mockserver-client-java.version}</version>
         </dependency>
         <dependency>
             <groupId>io.qameta.allure</groupId>

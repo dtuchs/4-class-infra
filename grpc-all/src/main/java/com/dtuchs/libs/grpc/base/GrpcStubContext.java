@@ -1,12 +1,12 @@
 package com.dtuchs.libs.grpc.base;
 
 import com.dtuchs.libs.grpc.base.interceptor.ConsoleInterceptor;
-import com.dtuchs.libs.grpc.base.interceptor.AllureInterceptor;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.AbstractAsyncStub;
 import io.grpc.stub.AbstractBlockingStub;
 import io.grpc.stub.AbstractStub;
+import io.qameta.allure.grpc.AllureGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,20 +22,18 @@ enum GrpcStubContext {
             CREATE_BLOCKING_STUB_METHOD_NAME = "newBlockingStub",
             CREATE_STUB_METHOD_NAME = "newStub";
 
-    private Logger log = LoggerFactory.getLogger(GrpcStubContext.class);
+    private final Logger log = LoggerFactory.getLogger(GrpcStubContext.class);
     private final Map<ConnConfig, ? super AbstractStub<?>> container = new HashMap<>();
 
     /**
      * Get existing or compute a new Blocking / Async Stub for given configuration.
      */
     synchronized <T extends AbstractStub<T>> T get(ConnConfig connConfig) {
-        if (container.containsKey(connConfig))
-            return (T) container.get(connConfig);
-        else {
+        if (!container.containsKey(connConfig)) {
             T stub = createStub(connConfig);
             container.put(connConfig, stub);
-            return stub;
         }
+        return (T) container.get(connConfig);
     }
 
     private <T extends AbstractStub<T>> T createStub(ConnConfig connConfig) {
@@ -45,9 +43,12 @@ enum GrpcStubContext {
                     .getMethod(resolveNewInstanceMethod(connConfig.stubClass), io.grpc.Channel.class);
 
             return ((T) m.invoke(null, ChannelFactory.getChannel(connConfig)))
-                    .withInterceptors(new ConsoleInterceptor(), new AllureInterceptor(connConfig.autoConvertRawJson));
+                    .withInterceptors(
+                            new ConsoleInterceptor(),
+                            new AllureGrpc()
+                    );
         } catch (Exception e) {
-            throw new IllegalStateException("Can`t create blockingStub", e);
+            throw new IllegalStateException("Can`t create stub", e);
         }
     }
 
@@ -56,7 +57,8 @@ enum GrpcStubContext {
             return CREATE_BLOCKING_STUB_METHOD_NAME;
         } else if (AbstractAsyncStub.class.isAssignableFrom(stubClass)) {
             return CREATE_STUB_METHOD_NAME;
-        } else throw new IllegalArgumentException("Stub class must extends AbstractBlockingStub or AbstractAsyncStub");
+        } else
+            throw new IllegalArgumentException("AbstractBlockingStub or AbstractAsyncStub expected");
     }
 
     static class ChannelFactory {

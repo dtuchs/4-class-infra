@@ -9,11 +9,12 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 enum DataSourceContext {
     INSTANCE;
 
-    private Logger log = LoggerFactory.getLogger(DataSourceContext.class);
+    private final Logger log = LoggerFactory.getLogger(DataSourceContext.class);
     private final Map<ConnConfig, DataSource> container = new HashMap<>();
 
     /**
@@ -26,12 +27,7 @@ enum DataSourceContext {
             log.warn("### Init DataSource ###");
             HikariConfig config = new HikariConfig();
 
-            if (connConfig.jdbcUrl == null) {
-                config.setJdbcUrl(connConfig.jdbcPrefix + "://" + connConfig.dbHost + ":" + connConfig.dbPort + "/" + connConfig.dbName);
-            } else {
-                config.setJdbcUrl(connConfig.jdbcUrl);
-            }
-
+            config.setJdbcUrl(Objects.requireNonNullElseGet(connConfig.jdbcUrl, () -> connConfig.jdbcPrefix + "://" + connConfig.dbHost + ":" + connConfig.dbPort + "/" + connConfig.dbName));
             config.setUsername(connConfig.username);
             config.setPassword(connConfig.password);
             config.setDriverClassName(connConfig.jdbcClass);

@@ -6,17 +6,17 @@ import retrofit2.Response;
 
 import java.io.IOException;
 
-public class CallExecutor implements Executor {
+public class CommonExecutor implements Executor {
 
     private boolean acceptRedirectedResponse = false;
 
     /**
-     * @deprecated use methods {@link #toBody(Call<T>)}, {@link #toResponse(Call<T>)}
+     * @deprecated use methods {@link #toBody(Call)}, {@link #toResponse(Call)}
      */
     @Override
     @Deprecated
     public <T> T execute(Call<T> call) {
-        T result = null;
+        T result;
         try {
             Response<T> response = call.execute();
             if (response.isSuccessful() || (acceptRedirectedResponse && response.code() == 302)) {
@@ -54,12 +54,12 @@ public class CallExecutor implements Executor {
      * @return raw response with fluent check functionality
      */
     @Override
-    public <T> ResponseProxy<T> toResponseProxy(Call<T> call) {
-        return new ResponseProxy<>(toResponse(call));
+    public <T> VerifiableResponse<T> toVerifiableResponse(Call<T> call) {
+        return new VerifiableResponse<>(toResponse(call));
     }
 
     @Override
-    public CallExecutor acceptRedirectedResponse(boolean redirectedResponse) {
+    public CommonExecutor acceptRedirectedResponse(boolean redirectedResponse) {
         acceptRedirectedResponse = redirectedResponse;
         return this;
     }

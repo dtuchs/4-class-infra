@@ -1,4 +1,4 @@
-package com.dtuchs.libs.orm.base;
+package com.dtuchs.libs.orm.service;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,8 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ADVERTISER")
-class Advertiser {
+@Table(name = "PIZZA")
+public class Pizza {
 
     private int id;
     private String name;
@@ -32,6 +32,4 @@ class Advertiser {
     public void setName(String name) {
         this.name = name;
     }
-
-
 }

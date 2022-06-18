@@ -30,7 +30,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class ApiServiceFactoryTest {
 
-    private static WireMockServer wireMockServer = new WireMockServer(wireMockConfig().dynamicPort().dynamicHttpsPort());
+    static WireMockServer wireMockServer = new WireMockServer(wireMockConfig().dynamicPort().dynamicHttpsPort());
+    Executor executor = new CommonExecutor();
 
     @BeforeAll
     static void setUp() {
@@ -40,14 +41,14 @@ class ApiServiceFactoryTest {
 
     static void setUpStubs() {
         wireMockServer.stubFor(post(urlEqualTo("/test"))
-                .willReturn(aResponse()
-                        .withStatus(201)));
+                .willReturn(aResponse().withStatus(201)));
 
         wireMockServer.stubFor(get(urlEqualTo("/test"))
                 .willReturn(aResponse().withStatus(200)));
 
         wireMockServer.stubFor(post(urlEqualTo("/nogson"))
-                .willReturn(aResponse().withBody("qwerty")
+                .willReturn(aResponse()
+                        .withBody("qwerty")
                         .withStatus(200)));
 
         wireMockServer.stubFor(post(urlEqualTo("/redirect"))
@@ -61,10 +62,15 @@ class ApiServiceFactoryTest {
 
     @Test
     void defaultApiServiceFactoryTest() throws Exception {
-        ApiServiceFactory apiServiceFactory = new ApiServiceFactory.ApiServiceBuilder("http://localhost:" + wireMockServer.port()).build();
+        ApiServiceFactory apiServiceFactory = new ApiServiceFactory
+                .ApiServiceBuilder("http://localhost:" + wireMockServer.port())
+                .build();
+
         Call<ResponseBody> call = apiServiceFactory.getService(TestService.class)
                 .executeTest(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
-        call.execute();
+
+        executor.toVerifiableResponse(call)
+                .checkCode(201);
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/test"))
                 .withRequestBody(equalToJson("{\"date_time\": \"20/11/2017\"}")));
@@ -72,10 +78,16 @@ class ApiServiceFactoryTest {
 
     @Test
     void apiServiceFactoryWithCustomDateFormatterTest() throws Exception {
-        ApiServiceFactory apiServiceFactory = new ApiServiceFactory.ApiServiceBuilder("http://localhost:" + wireMockServer.port()).withCustomDateFormat("yyyy-MM-dd").build();
+        ApiServiceFactory apiServiceFactory = new ApiServiceFactory
+                .ApiServiceBuilder("http://localhost:" + wireMockServer.port())
+                .withCustomDateFormat("yyyy-MM-dd")
+                .build();
+
         Call<ResponseBody> call = apiServiceFactory.getService(TestService.class)
                 .executeTest(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
-        call.execute();
+
+        executor.toVerifiableResponse(call)
+                .checkCode(201);
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/test"))
                 .withRequestBody(equalToJson("{\"date_time\": \"2017-11-20\"}")));
@@ -83,57 +95,90 @@ class ApiServiceFactoryTest {
 
     @Test
     void apiServiceFactoryWithCustomFieldNamingPolicyTest() throws Exception {
-        ApiServiceFactory apiServiceFactory = new ApiServiceFactory.ApiServiceBuilder("http://localhost:" + wireMockServer.port()).withCustomFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).build();
+        ApiServiceFactory apiServiceFactory = new ApiServiceFactory
+                .ApiServiceBuilder("http://localhost:" + wireMockServer.port())
+                .withCustomFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                .build();
+
         Call<ResponseBody> call = apiServiceFactory.getService(TestService.class)
                 .executeTest(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
-        call.execute();
+
+        executor.toVerifiableResponse(call)
+                .checkCode(201);
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/test"))
                 .withRequestBody(equalToJson("{\"DateTime\": \"20/11/2017\"}")));
     }
 
     @Test
-    void apiServiceFactoryWithDisableGsonTest() throws Exception {
-        ApiServiceFactory apiServiceFactory = new ApiServiceFactory.ApiServiceBuilder("http://localhost:" + wireMockServer.port()).disableGsonConverter().build();
-        Call<ResponseBody> call = apiServiceFactory.getService(TestService.class).executeNoGson(RequestBody.create(MediaType.parse("text/html"), "123"));
-        Response<ResponseBody> res = call.execute();
-        assertThat(requireNonNull(res.body()).string()).isEqualTo("qwerty");
+    void apiServiceFactoryWithDisableGsonTest() {
+        ApiServiceFactory apiServiceFactory = new ApiServiceFactory
+                .ApiServiceBuilder("http://localhost:" + wireMockServer.port())
+                .disableGsonConverter()
+                .build();
+
+        Call<ResponseBody> call = apiServiceFactory.getService(TestService.class)
+                .executeNoGson(RequestBody.create(MediaType.parse("text/html"), "123"));
+
+        executor.toVerifiableResponse(call)
+                .checkCode(200)
+                .check(response -> assertThat(response.body()).isNotNull())
+                .check(response -> assertThat(response.body().string()).isEqualTo("qwerty"));
     }
 
     @Test
     void apiServiceFactoryWithSwitchedOffFollowRedirectsTest() throws Exception {
-        ApiServiceFactory apiServiceFactory = new ApiServiceFactory.ApiServiceBuilder("http://localhost:" + wireMockServer.port()).switchOffFollowRedirects().build();
-        Call<ResponseBody> call = apiServiceFactory.getService(TestService.class).redirect(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
-        Response<ResponseBody> res = call.execute();
+        ApiServiceFactory apiServiceFactory = new ApiServiceFactory
+                .ApiServiceBuilder("http://localhost:" + wireMockServer.port())
+                .switchOffFollowRedirects()
+                .build();
+
+        Call<ResponseBody> call = apiServiceFactory.getService(TestService.class)
+                .redirect(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
+
+        executor.toVerifiableResponse(call)
+                .checkCode(302);
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/redirect")));
-        assertThat(res.code()).isEqualTo(302);
     }
 
     @Test
     void apiServiceFactoryWithSwitchedOnFollowRedirectsTest() throws Exception {
-        ApiServiceFactory apiServiceFactory = new ApiServiceFactory.ApiServiceBuilder("http://localhost:" + wireMockServer.port()).build();
-        Call<ResponseBody> call = apiServiceFactory.getService(TestService.class).redirect(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
-        Response<ResponseBody> res = call.execute();
+        ApiServiceFactory apiServiceFactory = new ApiServiceFactory
+                .ApiServiceBuilder("http://localhost:" + wireMockServer.port())
+                .build();
+
+        Call<ResponseBody> call = apiServiceFactory.getService(TestService.class)
+                .redirect(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
+
+        executor.toVerifiableResponse(call)
+                .checkCode(200);
 
         wireMockServer.verify(postRequestedFor(urlEqualTo("/redirect")));
         wireMockServer.verify(getRequestedFor(urlEqualTo("/test")));
-        assertThat(res.code()).isEqualTo(200);
     }
 
     @Test
     void apiServiceFactoryWithTypeAdapterTest() throws Exception {
-        ApiServiceFactory apiServiceFactory = new ApiServiceFactory.ApiServiceBuilder("http://localhost:" + wireMockServer.port())
+        ApiServiceFactory apiServiceFactory = new ApiServiceFactory
+                .ApiServiceBuilder("http://localhost:" + wireMockServer.port())
                 .withTypeAdapter(Date.class, new DateSerializer())
                 .build();
-        Call<TestData> call = apiServiceFactory.getService(TestService.class).typeAdapter(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
-        Response<TestData> res = call.execute();
 
+        Call<TestData> call = apiServiceFactory.getService(TestService.class)
+                .typeAdapter(new TestData(new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2017")));
+
+        final Date expectedDate = new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2010");
+
+        //check response deserialization
+        executor.toVerifiableResponse(call)
+                .checkCode(201)
+                        .check(response -> assertThat(response.body()).isNotNull())
+                        .check(response -> assertThat(response.body().getDateTime()).isEqualTo(expectedDate));
+
+        // check request serialization
         wireMockServer.verify(putRequestedFor(urlEqualTo("/adapter"))
-                .withRequestBody(equalToJson("{\"date_time\": \"11/20/2017\"}"))); // check request serialization
-        Date expectedDate = new SimpleDateFormat("dd/MM/yyyy").parse("20/11/2010");
-
-        assertThat(requireNonNull(res.body()).getDateTime()).isEqualTo(expectedDate);//check response deserialization
+                .withRequestBody(equalToJson("{\"date_time\": \"11/20/2017\"}")));
     }
 
     @AfterAll

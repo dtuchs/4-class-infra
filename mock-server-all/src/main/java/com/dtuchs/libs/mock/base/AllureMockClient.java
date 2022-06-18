@@ -7,6 +7,8 @@ import io.qameta.allure.attachment.AttachmentProcessor;
 import io.qameta.allure.attachment.DefaultAttachmentProcessor;
 import io.qameta.allure.attachment.FreemarkerAttachmentRenderer;
 import org.mockserver.client.MockServerClient;
+import org.mockserver.configuration.ClientConfiguration;
+import org.mockserver.configuration.Configuration;
 import org.mockserver.matchers.TimeToLive;
 import org.mockserver.matchers.Times;
 import org.mockserver.model.ExpectationId;
@@ -29,16 +31,36 @@ public class AllureMockClient extends MockServerClient {
     private boolean logToAllure = false;
     private boolean defaultResponseEnabled = false;
 
-    public AllureMockClient(CompletableFuture<Integer> portFuture) {
-        super(portFuture);
+    public AllureMockClient(Configuration configuration, CompletableFuture<Integer> portFuture) {
+        super(configuration, portFuture);
+    }
+
+    public AllureMockClient(ClientConfiguration configuration, CompletableFuture<Integer> portFuture) {
+        super(configuration, portFuture);
     }
 
     public AllureMockClient(String host, int port) {
         super(host, port);
     }
 
+    public AllureMockClient(Configuration configuration, String host, int port) {
+        super(configuration, host, port);
+    }
+
+    public AllureMockClient(ClientConfiguration configuration, String host, int port) {
+        super(configuration, host, port);
+    }
+
     public AllureMockClient(String host, int port, String contextPath) {
         super(host, port, contextPath);
+    }
+
+    public AllureMockClient(Configuration configuration, String host, int port, String contextPath) {
+        super(configuration, host, port, contextPath);
+    }
+
+    public AllureMockClient(ClientConfiguration configuration, String host, int port, String contextPath) {
+        super(configuration, host, port, contextPath);
     }
 
     public AllureMockClient withDefaultOKResponse() {
@@ -48,14 +70,15 @@ public class AllureMockClient extends MockServerClient {
     }
 
     @Override
-    public MockServerClient reset() {
+    public AllureMockClient reset() {
         try {
-            return super.reset();
+            super.reset();
         } finally {
             if (defaultResponseEnabled) {
                 configureDefaultResponse();
             }
         }
+        return this;
     }
 
     public AllureMockClient enableAllureLog() {

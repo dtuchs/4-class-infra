@@ -4,31 +4,20 @@ import io.grpc.stub.AbstractStub;
 
 public class GrpcStubBuilder {
 
-    private ConnConfig connConfig;
-
-    ConnConfig config() {
-        if (connConfig == null)
-            connConfig = new ConnConfig();
-        return connConfig;
-    }
+    private final ConnConfig config = new ConnConfig();
 
     public <T extends AbstractStub<T>> GrpcStubBuilder forStub(Class<T> stubClass) {
-        config().stubClass = stubClass;
+        config.stubClass = stubClass;
         return this;
     }
 
     public GrpcStubBuilder withHost(String grpcHost) {
-        config().grpcHost = grpcHost;
+        config.grpcHost = grpcHost;
         return this;
     }
 
     public GrpcStubBuilder withPort(int grpcPort) {
-        config().grpcPort = grpcPort;
-        return this;
-    }
-
-    public GrpcStubBuilder autoConvertBase64JsonForLogging(boolean convert) {
-        config().autoConvertRawJson = convert;
+        config.grpcPort = grpcPort;
         return this;
     }
 
@@ -36,6 +25,6 @@ public class GrpcStubBuilder {
      * Build blocking / async stub (depends on given stubClass)
      */
     public <T extends AbstractStub<T>> T build() {
-        return GrpcStubContext.INSTANCE.get(config().validate());
+        return GrpcStubContext.INSTANCE.get(config.validate());
     }
 }

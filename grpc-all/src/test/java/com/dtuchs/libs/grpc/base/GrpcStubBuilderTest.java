@@ -1,8 +1,8 @@
 package com.dtuchs.libs.grpc.base;
 
-import com.propellerads.libs.grpc.base.proto.Request;
-import com.propellerads.libs.grpc.base.proto.Response;
-import com.propellerads.libs.grpc.base.proto.TestServiceGrpc;
+import com.dtuchs.libs.grpc.base.proto.Request;
+import com.dtuchs.libs.grpc.base.proto.Response;
+import com.dtuchs.libs.grpc.base.proto.TestServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.AbstractStub;
@@ -33,13 +33,17 @@ class GrpcStubBuilderTest {
         GrpcStubContext.ChannelFactory.setMockChannel(channel);
     }
 
-    @ValueSource(classes = {TestServiceGrpc.TestServiceBlockingStub.class, TestServiceGrpc.TestServiceStub.class})
+    @ValueSource(classes = {
+            TestServiceGrpc.TestServiceBlockingStub.class,
+            TestServiceGrpc.TestServiceStub.class}
+    )
     @ParameterizedTest
     <T extends AbstractStub<T>> void blockingStubShouldReturnedForGiven(Class<T> stubClass) {
-        AbstractStub stub = new GrpcStubBuilder().forStub(stubClass)
+        T stub = new GrpcStubBuilder().forStub(stubClass)
                 .withHost("localhost")
                 .withPort(GrpcMock.getGlobalPort())
                 .build();
+
 
         Assertions.assertEquals(stubClass, stub.getClass());
     }

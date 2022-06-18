@@ -4,9 +4,9 @@ import io.qameta.allure.Allure;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class AllureCallExecutor implements Executor {
+public class AllureExecutor implements Executor {
 
-    private Executor callExecutor = new CallExecutor();
+    private final Executor callExecutor = new CommonExecutor();
 
     @Override
     @Deprecated
@@ -33,12 +33,12 @@ public class AllureCallExecutor implements Executor {
     }
 
     @Override
-    public <T> ResponseProxy<T> toResponseProxy(Call<T> call) {
-        return new ResponseProxy<>(this.toResponse(call));
+    public <T> VerifiableResponse<T> toVerifiableResponse(Call<T> call) {
+        return new VerifiableResponse<>(this.toResponse(call));
     }
 
     @Override
-    public AllureCallExecutor acceptRedirectedResponse(boolean redirectedResponse) {
+    public AllureExecutor acceptRedirectedResponse(boolean redirectedResponse) {
         callExecutor.acceptRedirectedResponse(redirectedResponse);
         return this;
     }

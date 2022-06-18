@@ -10,7 +10,6 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -154,8 +153,7 @@ public class ApiServiceFactory {
     private ApiServiceFactory(ApiServiceBuilder apiServiceBuilder) {
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(apiServiceBuilder.baseUrl)
-                .client(apiServiceBuilder.okHttpClientBuilder.build())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+                .client(apiServiceBuilder.okHttpClientBuilder.build());
 
         if (apiServiceBuilder.customConverters != null && !apiServiceBuilder.customConverters.isEmpty())
             apiServiceBuilder.customConverters.forEach(builder::addConverterFactory);

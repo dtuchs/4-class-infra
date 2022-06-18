@@ -3,7 +3,7 @@ syntax = "proto3";
 package grpc;
 
 option java_multiple_files = true;
-option java_package = "com.propellerads.libs.grpc.base.proto";
+option java_package = "com.dtuchs.libs.grpc.base.proto";
 
 service TestService {
   rpc Calculate (Request) returns (Response) {}
@@ -16,4 +16,3 @@ message Request {
 message Response {
   string message = 1;
 }
-

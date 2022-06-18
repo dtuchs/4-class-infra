@@ -4,18 +4,18 @@ import java.util.Objects;
 
 final class ConnConfig {
 
-    public String jdbcPrefix;
-    public String dbHost;
-    public String dbName;
-    public Integer dbPort;
+    String jdbcPrefix;
+    String dbHost;
+    String dbName;
+    Integer dbPort;
 
-    public String username;
-    public String password;
+    String username;
+    String password;
 
-    public String jdbcClass;
-    public String jdbcUrl;
+    String jdbcClass;
+    String jdbcUrl;
 
-    public ConnConfig validate() {
+    ConnConfig validate() {
         if (username == null)
             throw new IllegalStateException("db username must not be null.");
         if (password == null)
